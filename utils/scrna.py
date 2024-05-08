@@ -1,8 +1,8 @@
-    import numpy as np
-    import pandas as pd
-    import scipy as sp
-    import scanpy as sc
-    from anndata import AnnData
+import numpy as np
+import pandas as pd
+import scipy as sp
+import scanpy as sc
+from anndata import AnnData
 
 class SCRNA(object):
     """
@@ -14,8 +14,6 @@ class SCRNA(object):
 
         """
         super(SCRNA, self).__init__()
-        import numpy as np
-
 
     
     @staticmethod
@@ -26,7 +24,7 @@ class SCRNA(object):
         features = data.columns
         cells = data.index
         
-        import scanpy as sc
+        import scipy as sp
         data = sp.sparse.csr_matrix(data.to_numpy())
         data.astype('float32')
         
