@@ -44,4 +44,4 @@ class RNA(object):
         ----------
 
         """
-        super(DNA, self).__init__()
+        super(RNA, self).__init__()
