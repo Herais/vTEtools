@@ -45,7 +45,7 @@ class SCRNA(object):
         df = df.map(lambda x: x[0])
         df.columns = cols
 
-    return df.copy()
+        return df.copy()
 
     @staticmethod
     def screenTE_adata2(adata,
