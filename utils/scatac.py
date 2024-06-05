@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import scanpy as sc
+import scipy as sp
 from anndata import AnnData
 
 class SCATAC(object):
@@ -38,20 +39,50 @@ class SCATAC(object):
         return ad
     
     @staticmethod
-    def read_pl_rank_genes_groups_to_df(
-            adata,
-            cols=['names', 'scores', 'pvals', 'pvals_adj', 'logfoldchanges']):
+    def read_pl_rank_genes_groups_to_df(adata):
+
+        cols = ['names', 'scores', 'pvals', 'pvals_adj', 'logfoldchanges']
+        uns_col = 'rank_genes_groups'
 
         ls = []
         for col in cols:
-            ls.append(adata.uns['rank_genes_groups'][col])
+            if col in adata.uns[uns_col].keys():
+                ls.append(adata.uns[uns_col][col])
 
         df = pd.DataFrame(ls).T
         df = df.map(lambda x: x[0])
         df.columns = cols
 
+        df = pd.concat([df.set_index('names'),
+                        adata.uns[uns_col]['pts'].add_prefix('pts_')],
+                       axis=1)
+
+        print(adata.uns[uns_col]['params'])
+
         return df.copy()
 
+    @staticmethod
+    def read_pl_rank_genes_groups_filtered_to_df(adata, uns_col='rank_genes_groups_filtered'):
+
+        cols = ['names', 'scores', 'pvals', 'pvals_adj', 'logfoldchanges']
+
+        ls = []
+        for col in cols:
+            if col in adata.uns[uns_col].keys():
+                ls.append(adata.uns[uns_col][col])
+
+        df = pd.DataFrame(ls).T
+        df = df.map(lambda x: x[0])
+        df.columns = cols
+
+        df = df.dropna(subset=['names']).set_index('names')
+        df_pts = adata.uns[uns_col]['pts'].add_prefix('pts_')
+        df[['pts_TAC', 'pts_Sham']] = df_pts
+
+        print(adata.uns[uns_col]['params'])
+
+        return df.copy()
+        
     @staticmethod
     def screenTE_adata2(adata,
                         pvals=None,
