@@ -1,5 +1,5 @@
 import Bio
-from Bio import SeqIO
+from Bio import Entrez, SeqIO
 from Bio.Seq import Seq
 
 
