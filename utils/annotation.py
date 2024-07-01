@@ -2,7 +2,7 @@ import utils
 import pandas as pd
 import numpy as np
 from Bio.Seq import Seq
-from Bio.SeqRecord import SeqR
+from Bio import Entrez, SeqIO
 
 
 class ANNOTATION(object):
