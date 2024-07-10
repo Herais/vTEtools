@@ -120,3 +120,46 @@ class TE(object):
             ls_seq.append(str(record.seq))
 
         return ls_seq
+
+    @staticmethod
+    def get_seq_upstream_of_PAM(seq: str, len_guide=20, pam="*GG"):
+
+        """
+        """
+        len_seq = len(seq)
+        len_pam = len(pam)
+        pat_pam = re.sub(r"\*", "[ATCG]", pam)
+        ls_gRNA_candidates = []
+
+        for i in range(len_seq-len_pam):
+            _pam = seq[i:i+len_pam]
+            if re.match(pat_pam, _pam):
+                if (i - len_guide) > -1:
+                    pat_seq = seq[i-len_guide:i]
+                    # print(i, re.match(pat_pam, _pam), pat_seq)
+                    ls_gRNA_candidates.append((pat_seq, _pam))
+
+        return ls_gRNA_candidates
+    
+    @staticmethod
+    def get_count_gRNA_loci(df, col='gRNA_20_bp'):
+        """
+        """
+        df_gRNA = df[df['meta']['num_{}'.format(col)] > 0].copy()  # 295
+        S = df_gRNA['meta'][col].apply(lambda x:
+                                    Counter(set([g[0] for g in x])))
+        return S.sum()
+
+    @staticmethod
+    def generate_gRNA_by_length(seq, len_guide=20):
+        """
+        """
+
+        assert (len_guide > len_seq,
+                "The sequence of length {} is shorter than gRNA of length {}".format(len_seq, len_guide))
+
+        ls_gRNA = []
+        for i in range(len_seq-len_guide):
+            ls_gRNA.append(seq[i:i+len_guide])
+
+        return ls_gRNA

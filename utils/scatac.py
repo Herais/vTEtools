@@ -83,7 +83,9 @@ class SCATAC(object):
                         pvals_adj=None,
                         min_logfoldchange=None,
                         method='wilcoxon',
-                        layer='norm_to_TE_include'):
+                        layer=None):
+        
+        mySCATAC = SCATAC()
 
         #pair = (reference, group)
         pairs = [('Sham', 'TAC'),
@@ -123,6 +125,7 @@ class SCATAC(object):
                                         reference=pair[0],
                                         method=_method,
                                         tie_correct=True,
+                                        pts=True,
                                         layer=layer)
             elif _method == 't-test':
                 sc.tl.rank_genes_groups(adata,
@@ -130,11 +133,10 @@ class SCATAC(object):
                                         groups=[pair[1]],
                                         reference=pair[0],
                                         method=_method,
+                                        pts=True,
                                         layer=layer)
 
-            mySCRNA = SCRNA()
-
-            xy2df[xy]['df'] = mySCRNA.read_pl_rank_genes_groups_to_df(adata)
+            xy2df[xy]['df'] = mySCATAC.read_pl_rank_genes_groups_to_df(adata)
 
             xy2df[xy]['up'] = xy2df[xy]['df'][xy2df[xy]['df'].logfoldchanges > 0]
             xy2df[xy]['up'] = xy2df[xy]['up'][xy2df[xy]['up'].pvals <= _pvals]
@@ -169,9 +171,9 @@ class SCATAC(object):
         
                 
                 df= xy2df[xy][move]
-                pattern2df[pattern_name][pair_pattern] = df['names'].shape[0]
+                pattern2df[pattern_name][pair_pattern] = len(df.index)
                 
-                lsls.append(df['names'].to_list())
+                lsls.append(df.index.to_list())
         
             common = set(lsls[0])
             for ls in lsls[1:]:
