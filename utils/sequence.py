@@ -36,7 +36,12 @@ class DNA(object):
         return ls_seq
     
     @staticmethod
-    def get_tmpfp_bed4(S, fp="./tmp.bed"):
+    def get_tmpfp_bed4(S, fp="default"):
+
+        if dname == "default":
+            dname = "tmp_vTEtools"
+            os.makedirs(dname, exist_ok=True)
+            fp = "./tmp_vTEtools/tmp.bed"
     
         df_coord = S.str.split('[:-]', expand=True)
         df_coord.columns = ['Chromosome', 'Start', 'End']
@@ -47,7 +52,7 @@ class DNA(object):
         return fp
 
     @staticmethod
-    def get_flop_coordinates(S, fp_genome:str, len_flop=50, fptmp="./tmp.bed"):
+    def get_flop_coordinates(S, fp_genome:str, len_flop=50, fptmp="default"):
 
         myDNA = DNA()
         
