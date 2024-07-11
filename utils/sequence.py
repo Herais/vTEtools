@@ -1,6 +1,7 @@
 import Bio
 from Bio import Entrez, SeqIO
 from Bio.Seq import Seq
+from fuc import pybed
 
 
 class DNA(object):
