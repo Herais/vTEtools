@@ -15,3 +15,4 @@ class SGRNA(object):
 
         """
         super(SGRNA, self).__init__()
+

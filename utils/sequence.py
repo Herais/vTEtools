@@ -47,9 +47,11 @@ class DNA(object):
         return fp
 
     @staticmethod
-    def get_flop_coordinates(S, fp_genome:str, len_flop=50):
+    def get_flop_coordinates(S, fp_genome:str, len_flop=50, fptmp="./tmp.bed"):
+
+        myDNA = DNA()
         
-        fp_bed = get_tmpfp_bed4(S)
+        fp_bed = myDNA.get_tmpfp_bed4(S, fp=fptmp)
         cmd = "bedtools slop -b {} -i {} -g {}".format(len_flop, fp_bed, fp_genome)
         res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         df_flop_coord = pd.read_csv(StringIO(res.stdout), sep='\t', header=None).set_index(3).sort_index()
