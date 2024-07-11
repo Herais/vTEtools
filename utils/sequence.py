@@ -1,4 +1,9 @@
+import os, sys
+import subprocess
+from io import StringIO
 import Bio
+import pandas as pd
+import numpy as np
 from Bio import Entrez, SeqIO
 from Bio.Seq import Seq
 from fuc import pybed
@@ -38,7 +43,7 @@ class DNA(object):
     @staticmethod
     def get_tmpfp_bed4(S, fp="default"):
 
-        if dname == "default":
+        if fp == "default":
             dname = "tmp_vTEtools"
             os.makedirs(dname, exist_ok=True)
             fp = "./tmp_vTEtools/tmp.bed"
@@ -50,6 +55,17 @@ class DNA(object):
         bed = pybed.BedFrame.from_frame(meta=[], data=df_coord)
         bed.to_file(fp)
         return fp
+
+    @staticmethod
+    def get_sequence_from_coordinates(coords, fp_fasta):
+        
+        myDNA = DNA()
+        fp = myDNA.get_tmpfp_bed4(coords)
+        cmd = "bedtools getfasta -fi {} -bed {} -s -bedOut".format(fp_fasta, fp)
+        res =  subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        dftmp = pd.read_csv(StringIO(res.stdout), sep='\t', header=None).set_index(3)
+
+        return dftmp[4]
 
     @staticmethod
     def get_flop_coordinates(S, fp_genome:str, len_flop=50, fptmp="default"):
@@ -64,6 +80,12 @@ class DNA(object):
 
         df_flop_coord.columns = [['meta']*3, ['chr_flop', 'start_flop', 'end_flop']]
         return df_flop_coord
+    
+    @staticmethod
+    def get_reverse_complement(seq):
+        """
+        """
+        return str(Seq(seq).reverse_complement())
     
 
 class RNA(object):
