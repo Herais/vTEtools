@@ -1,3 +1,5 @@
+import os, subprocess
+import re
 import numpy as np
 import pandas as pd
 import scanpy as sc
@@ -151,6 +153,20 @@ class TE(object):
         return S.sum()
 
     @staticmethod
+    def get_gcount_from_sequence(
+        seq, 
+        fp_genome='/gladstone/alexanian/datasets-online/VX_reference_and_indexes/hg38//Homo_sapiens.GRCh38.dna.primary_assembly_noScaffold.fa'
+        ):
+        
+        cmd = 'grep -c "{}" {}'.format(seq, fp_genome)
+        #print(cmd)
+        res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        gcount = (res.stdout).rstrip()
+        gcount = int(gcount)
+    
+        return gcount
+
+    @staticmethod
     def generate_gRNA_by_length(seq, len_guide=20):
         """
         """
@@ -163,3 +179,75 @@ class TE(object):
             ls_gRNA.append(seq[i:i+len_guide])
 
         return ls_gRNA
+
+    @staticmethod
+    def runBigWigAverageOverBed(
+        ls_fp_bw,
+        fp_bed,
+        dpath_result=None, 
+        cmd_bigWigAverageOverBed = "/gladstone/alexanian/datasets-online/VX_pyProjects/pjScAtacSeq/tools/bigWigAverageOverBed",
+        bw_extension='bigWig',
+        show_progress=False,):
+
+        """
+        """
+        os.makedirs(dpath_result, exist_ok=True)
+
+        for fp_bw in ls_fp_bw:
+            bw = fp_bw.split('/')[-1]
+            fout_tab = "{}/{}".format(dpath_result, re.sub(bw_extension, "tab", bw))
+            fout_ra = "{}/{}".format(dpath_result, re.sub(bw_extension, "ra", bw))
+            fout_bed = "{}/{}".format(dpath_result, re.sub(bw_extension, "bed", bw))
+            job_name = re.sub(bw_extension, "", bw)
+            
+            cmd="{} {} {} {} -stats={} -bedOut={} -minMax | qsub -S /bin/bash -cwd -N {}".format(
+                cmd_bigWigAverageOverBed,
+                fp_bw,
+                fp_bed,
+                fout_tab, 
+                fout_ra,
+                fout_bed,
+                job_name
+            )
+        
+            res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+
+            if show_progress:
+                print(res.stderr)
+        print('done.')
+
+    @staticmethod
+    def split_dfTE_to_groups(df, repName=None, return_all=False):
+
+        ret = {}
+
+        if repName:
+            df = df[df['repName'] == repName].copy()
+
+        if return_all:
+            ret['all'] = df.copy()
+
+        df_distal = df[df['isin_windowed_gap']]
+        ret['distal_to_pcgene'] = df_distal.copy()
+
+        df_pcgene = df[df['isin_gene']]
+        ret['pcgene'] = df_pcgene.copy()
+
+        df_pcgene_exonic = df[df['isin_gene']][df['isin_exon']]
+        ret['pcgene_exonic'] = df_pcgene_exonic.copy()
+        df_pcgene_intronic = df[df['isin_gene']][~df['isin_exon']]
+        ret['pcgene_intronic'] = df_pcgene_intronic.copy()
+
+        df_transcripts_nonpc = df[df['isin_transcript']][~df['isin_gene']]
+        ret['transcripts_nonpc'] = df_transcripts_nonpc.copy()
+
+        df_transcript_nonpc_exonics = df_transcripts_nonpc[df_transcripts_nonpc['isin_exon']]
+        ret['transcript_nonpc_exonic'] = df_transcript_nonpc_exonics.copy()
+
+        df_transcript_nonpc_intronic = df_transcripts_nonpc[~df_transcripts_nonpc['isin_exon']]
+        ret['transcript_nonpc_intronic'] = df_transcript_nonpc_intronic.copy()
+
+        df_buffer = df[~df['isin_windowed_gap']][~df['isin_transcript']]
+        ret['in_buffer'] = df_buffer.copy()
+
+        return ret

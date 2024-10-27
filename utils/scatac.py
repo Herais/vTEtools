@@ -83,15 +83,17 @@ class SCATAC(object):
                         pvals_adj=None,
                         min_logfoldchange=None,
                         method='wilcoxon',
+                        pairs=None,
                         layer=None):
         
         mySCATAC = SCATAC()
 
-        #pair = (reference, group)
-        pairs = [('Sham', 'TAC'),
-                (['TAC', 'TACJQ1']),
-                (['TACJQ1', 'TACJQ1w']),
-                ]
+        if not pairs:
+            #pair = (reference, group)
+            pairs = [('Sham', 'TAC'),
+                    ('TAC', 'TACJQ1'),
+                    ('TACJQ1', 'TACJQ1w'),
+                    ]
 
         xy2df = {}
 

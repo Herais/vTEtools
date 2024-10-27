@@ -77,6 +77,18 @@ class DNA(object):
         """
         """
         return str(Seq(seq).reverse_complement())
+
+    @staticmethod
+    def get_gcount_from_sequence(
+        seq, 
+        fp_genome='/gladstone/alexanian/datasets-online/VX_reference_and_indexes/hg38//Homo_sapiens.GRCh38.dna.primary_assembly_noScaffold.fa'):
+
+        cmd = 'grep -c "{}" {}'.format(seq, fp_genome)
+        res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        gcount = (res.stdout).rstrip()
+        gcount = int(gcount)
+        
+        return gcount
     
 
 class RNA(object):
